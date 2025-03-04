@@ -5,6 +5,11 @@ import { protectRoute } from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 router.post("/signup", signup);
+// router.post("/signup", (req, res) => {
+//     console.log("Signup route hit!");
+//     res.json({ message: "Signup works!" });
+//   });
+  
 router.post("/login", login);
 router.post("/logout", logout);
 
