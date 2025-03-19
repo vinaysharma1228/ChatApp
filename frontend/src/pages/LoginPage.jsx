@@ -51,7 +51,9 @@ const LoginPage = () => {
                   className={`input input-bordered w-full pl-10`}
                   placeholder="you@example.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -69,8 +71,11 @@ const LoginPage = () => {
                   className={`input input-bordered w-full pl-10`}
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                 />
+
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
@@ -85,7 +90,17 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={isLoggingIn}>
+            <div className="text-right mt-2">
+              <Link to="/forgot-password" className="link link-primary">
+                Forgot Password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={isLoggingIn}
+            >
               {isLoggingIn ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -95,6 +110,35 @@ const LoginPage = () => {
                 "Sign in"
               )}
             </button>
+
+            <div className="flex items-center my-4">
+              <div className="w-full border-t"></div>
+              <p className="px-4 text-base-content/60">or</p>
+              <div className="w-full border-t"></div>
+            </div>
+            <div className="flex justify-center gap-4">
+              <a href="/auth/google" className="w-12 h-12" title="Google">
+                <img
+                  src="/images/google-icon.png"
+                  alt="Sign in with Google"
+                  className="w-full h-full object-cover rounded-full border border-gray-300 hover:shadow-md transition"
+                />
+              </a>
+              <a href="/auth/facebook" className="w-12 h-12" title="Facebook">
+                <img
+                  src="/images/facebook-icon.png"
+                  alt="Sign in with Facebook"
+                  className="w-full h-full object-cover rounded-full border border-gray-300 hover:shadow-md transition"
+                />
+              </a>
+              <a href="/auth/github" className="w-12 h-12" title="Github">
+                <img
+                  src="/images/github-icon.png"
+                  alt="Sign in with GitHub"
+                  className="w-full h-full object-cover rounded-full border border-gray-300 hover:shadow-md transition"
+                />
+              </a>
+            </div>
           </form>
 
           <div className="text-center">
@@ -105,13 +149,27 @@ const LoginPage = () => {
               </Link>
             </p>
           </div>
+
+          <div className="mt-4 text-center text-sm">
+            <Link to="/terms" className=" link-primary hover:underline mr-4">
+              Terms & Conditions
+            </Link>
+            <Link to="/privacy" className=" link-primary hover:underline mr-4">
+              Privacy Policy
+            </Link>
+            <Link to="/about" className=" link-primary hover:underline">
+              About Us
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Right Side - Image/Pattern */}
       <AuthImagePattern
         title={"Welcome back!"}
-        subtitle={"Sign in to continue your conversations and catch up with your messages."}
+        subtitle={
+          "Sign in to continue your conversations and catch up with your messages."
+        }
       />
     </div>
   );

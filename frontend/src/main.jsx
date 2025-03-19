@@ -4,11 +4,17 @@ import "./index.css";
 import App from "./App.jsx";
 
 import { BrowserRouter } from "react-router-dom";
+import { SocketContextProvider } from "./context/SocketContext";
+import { MessagesContextProvider } from "./context/MessagesContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <SocketContextProvider>
+        <MessagesContextProvider>
+          <App />
+        </MessagesContextProvider>
+      </SocketContextProvider>
     </BrowserRouter>
   </StrictMode>
 );

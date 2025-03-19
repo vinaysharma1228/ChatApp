@@ -7,7 +7,7 @@ const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-  const { sendMessage } = useChatStore();
+  const { sendMessage, selectedUser, replyTo } = useChatStore();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -31,12 +31,18 @@ const MessageInput = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
+    if (!selectedUser || !selectedUser._id) {
+      toast.error("No recipient selected");
+      return;
+    }
 
     try {
-      await sendMessage({
-        text: text.trim(),
-        image: imagePreview,
-      });
+      await sendMessage(
+        selectedUser._id,
+        text.trim(),
+        imagePreview,
+        replyTo?.messageId
+      );
 
       // Clear form
       setText("");

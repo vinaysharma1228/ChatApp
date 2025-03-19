@@ -129,6 +129,34 @@ const SignUpPage = () => {
                 "Create Account"
               )}
             </button>
+            <div className="flex items-center my-4">
+              <div className="w-full border-t"></div>
+              <p className="px-4 text-base-content/60">or</p>
+              <div className="w-full border-t"></div>
+            </div>
+            <div className="flex justify-center gap-4">
+              <a href="/auth/google" className="w-12 h-12" title="Google" >
+                <img
+                  src="/images/google-icon.png"
+                  alt="Sign in with Google"
+                  className="w-full h-full object-cover rounded-full border border-gray-300 hover:shadow-md transition"
+                />
+              </a>
+              <a href="/auth/facebook" className="w-12 h-12" title="Facebook">
+                <img
+                  src="/images/facebook-icon.png"
+                  alt="Sign in with Facebook"
+                  className="w-full h-full object-cover rounded-full border border-gray-300 hover:shadow-md transition"
+                />
+              </a>
+              <a href="/auth/github" className="w-12 h-12" title="Github">
+                <img
+                  src="/images/github-icon.png"
+                  alt="Sign in with GitHub"
+                  className="w-full h-full object-cover rounded-full border border-gray-300 hover:shadow-md transition"
+                />
+              </a>
+            </div>
           </form>
 
           <div className="text-center">
@@ -138,6 +166,18 @@ const SignUpPage = () => {
                 Sign in
               </Link>
             </p>
+          </div>
+
+          <div className="mt-4 text-center text-sm">
+            <Link to="/terms" className=" link-primary hover:underline mr-4">
+              Terms & Conditions
+            </Link>
+            <Link to="/privacy" className=" link-primary hover:underline mr-4">
+              Privacy Policy
+            </Link>
+            <Link to="/about" className=" link-primary hover:underline">
+              About Us
+            </Link>
           </div>
         </div>
       </div>

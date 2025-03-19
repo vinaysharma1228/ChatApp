@@ -13,6 +13,13 @@ import { useEffect } from "react";
 
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import ForgotPassword from "./pages/ForgotPassword";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import AboutUs from "./pages/AboutUs";
+import ResetPassword from "./pages/ResetPassword";
+import { ProtectedRoute, GuestRoute } from "./components/AuthRoutes";
+import EditMessageModal from "./components/EditMessageModal";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
@@ -21,31 +28,52 @@ const App = () => {
   console.log({ onlineUsers });
 
   useEffect(() => {
+    // Check authentication status when app loads
     checkAuth();
   }, [checkAuth]);
 
   console.log({ authUser });
 
-  if (isCheckingAuth && !authUser)
+  // Show loading indicator only during initial check
+  if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="size-10 animate-spin" />
       </div>
     );
+  }
 
   return (
     <div data-theme={theme}>
+      {/* Always show navbar for all users */}
       <Navbar />
 
       <Routes>
-        <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-        <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/" />} />
-        <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+        {/* Protected routes - require authentication */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
+
+        {/* Guest routes - only accessible if NOT authenticated */}
+        <Route element={<GuestRoute />}>
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} /> 
+          <Route path="/reset-password" element={<ResetPassword />} />
+        </Route>
+
+        {/* Public routes - accessible to everyone */}
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/profile" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/about" element={<AboutUs />} />
       </Routes>
 
       <Toaster />
+      
+      {/* Global modals */}
+      <EditMessageModal />
     </div>
   );
 };
