@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import fileUpload from "express-fileupload";
 
 import path from "path";
 
@@ -27,10 +28,18 @@ app.use(
   })
 );
 
-app.use(express.json());
+// Increase the payload size limit for JSON and URL encoded data
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
 
+// Add file upload middleware
+app.use(fileUpload({
+  useTempFiles: true,
+  tempFileDir: '/tmp/',
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  abortOnLimit: true
+}));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);

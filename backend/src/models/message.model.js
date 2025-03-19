@@ -15,8 +15,23 @@ const messageSchema = new mongoose.Schema(
     text: {
       type: String,
     },
+    // Fields for different types of attachments
+    type: {
+      type: String,
+      enum: ["text", "image", "voice", "document"],
+      default: "text"
+    },
     image: {
       type: String,
+    },
+    attachment: {
+      type: String,
+    },
+    fileName: {
+      type: String,
+    },
+    duration: {
+      type: Number,
     },
     reactions: {
       type: Map,

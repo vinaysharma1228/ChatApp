@@ -74,25 +74,64 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image, replyToId } = req.body;
+    const { text, replyToId, attachmentType } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
-
-    let imageUrl;
-    if (image) {
-      // Upload base64 image to cloudinary
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
-    }
 
     // Create message data
     const messageData = {
       senderId,
       receiverId,
-      text,
-      image: imageUrl,
+      text: text || "",
       status: "sent"
     };
+
+    // Handle file uploads
+    if (req.files && req.files.attachment) {
+      const file = req.files.attachment;
+      
+      // Upload file to cloudinary based on type
+      let uploadResult;
+      if (attachmentType === 'image') {
+        uploadResult = await cloudinary.uploader.upload(file.tempFilePath, {
+          resource_type: 'image',
+          folder: 'chat_images'
+        });
+        messageData.image = uploadResult.secure_url;
+      } else if (attachmentType === 'voice') {
+        uploadResult = await cloudinary.uploader.upload(file.tempFilePath, {
+          resource_type: 'auto',
+          folder: 'chat_audio'
+        });
+        messageData.attachment = uploadResult.secure_url;
+        messageData.type = 'voice';
+        
+        // Parse duration carefully to ensure it's a valid number
+        let duration = 0;
+        if (req.body.duration) {
+          try {
+            duration = parseFloat(req.body.duration);
+            if (isNaN(duration) || !isFinite(duration)) {
+              duration = 0;
+            }
+          } catch (err) {
+            console.error("Error parsing voice message duration:", err);
+          }
+        }
+        
+        messageData.duration = duration;
+        console.log("Voice message duration saved:", duration);
+      } else {
+        // Document or other file types
+        uploadResult = await cloudinary.uploader.upload(file.tempFilePath, {
+          resource_type: 'auto',
+          folder: 'chat_documents'
+        });
+        messageData.attachment = uploadResult.secure_url;
+        messageData.type = 'document';
+        messageData.fileName = file.name;
+      }
+    }
 
     // Add reply data if this is a reply
     if (replyToId) {
@@ -118,7 +157,7 @@ export const sendMessage = async (req, res) => {
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.log("Error in sendMessage controller: ", error.message);
+    console.log("Error in sendMessage controller: ", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

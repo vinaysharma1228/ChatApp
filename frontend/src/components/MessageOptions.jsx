@@ -18,16 +18,57 @@ const MessageOptions = ({ message, isOwnMessage }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ left: false, right: false });
   const menuRef = useRef(null);
+  const buttonRef = useRef(null);
   const emojiPickerRef = useRef(null);
   const deleteOptionsRef = useRef(null);
   const { addReaction, setReplyTo, editMessage, deleteMessage } = useChatStore();
   const { authUser } = useAuthStore();
 
+  // Determine the correct position for the menu
+  const calculateMenuPosition = () => {
+    if (!buttonRef.current || !menuRef.current) return;
+    
+    const buttonRect = buttonRef.current.getBoundingClientRect();
+    const menuRect = menuRef.current.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    
+    // For own messages (right side)
+    if (isOwnMessage) {
+      // Check if menu will fit to the left
+      if (buttonRect.left - menuRect.width < 0) {
+        setMenuPosition({ left: false, right: false });
+      } else {
+        setMenuPosition({ left: false, right: true });
+      }
+    } 
+    // For other's messages (left side)
+    else {
+      // Check if menu will fit to the right
+      if (buttonRect.right + menuRect.width > windowWidth) {
+        setMenuPosition({ left: false, right: true });
+      } else {
+        setMenuPosition({ left: true, right: false });
+      }
+    }
+  };
+
+  // Calculate menu position when it's shown
+  useEffect(() => {
+    if (showMenu) {
+      calculateMenuPosition();
+      // Recalculate on window resize
+      window.addEventListener('resize', calculateMenuPosition);
+      return () => window.removeEventListener('resize', calculateMenuPosition);
+    }
+  }, [showMenu]);
+
   // Close menu and emoji picker when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (menuRef.current && !menuRef.current.contains(event.target) && 
+          !buttonRef.current.contains(event.target)) {
         setShowMenu(false);
       }
       if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target) && 
@@ -52,9 +93,10 @@ const MessageOptions = ({ message, isOwnMessage }) => {
     setShowMenu(false);
   };
 
-  // Check if edit is allowed (only within 15 minutes)
+  // Check if edit is allowed (only within 15 minutes and not for voice messages)
   const canEdit = () => {
     if (!isOwnMessage) return false;
+    if (message.type === 'voice') return false;
     
     const now = new Date();
     const messageTime = new Date(message.createdAt);
@@ -123,10 +165,19 @@ const MessageOptions = ({ message, isOwnMessage }) => {
 
   const userReaction = getUserReaction();
 
+  // Generate menu position classes
+  const getMenuPositionClasses = () => {
+    if (menuPosition.left) return 'left-full ml-2';
+    if (menuPosition.right) return 'right-full mr-2';
+    // Default positioning for fallback
+    return isOwnMessage ? 'right-0' : 'left-0';
+  };
+
   return (
     <div className="relative">
       {/* 3-dot menu button */}
       <button 
+        ref={buttonRef}
         onClick={() => {
           setShowMenu(!showMenu);
           setShowEmojiPicker(false); // Close emoji picker when opening menu
@@ -141,7 +192,7 @@ const MessageOptions = ({ message, isOwnMessage }) => {
       {showMenu && (
         <div 
           ref={menuRef}
-          className={`absolute ${isOwnMessage ? 'left-full ml-2' : 'right-full mr-2'} top-0 bg-base-100 shadow-lg rounded-lg py-1 z-20 border border-base-300 w-40`}
+          className={`absolute ${getMenuPositionClasses()} top-0 bg-base-100 shadow-lg rounded-lg py-1 z-20 border border-base-300 w-40`}
         >
           <button
             onClick={() => handleAction("reply")}
@@ -161,13 +212,15 @@ const MessageOptions = ({ message, isOwnMessage }) => {
 
           {isOwnMessage && (
             <>
-              <button
-                onClick={() => handleAction("edit")}
-                className={`flex items-center gap-2 w-full px-3 py-2 hover:bg-base-200 text-left text-sm ${!canEdit() ? 'opacity-50' : ''}`}
-              >
-                <Edit size={16} />
-                <span>Edit</span>
-              </button>
+              {canEdit() && (
+                <button
+                  onClick={() => handleAction("edit")}
+                  className="flex items-center gap-2 w-full px-3 py-2 hover:bg-base-200 text-left text-sm"
+                >
+                  <Edit size={16} />
+                  <span>Edit</span>
+                </button>
+              )}
 
               <button
                 onClick={() => handleAction("delete")}
@@ -203,7 +256,7 @@ const MessageOptions = ({ message, isOwnMessage }) => {
       {showDeleteOptions && (
         <div 
           ref={deleteOptionsRef}
-          className={`absolute ${isOwnMessage ? 'left-full ml-2' : 'right-full mr-2'} top-0 bg-base-100 shadow-lg rounded-lg py-1 z-20 border border-base-300 w-48`}
+          className={`absolute ${getMenuPositionClasses()} top-0 bg-base-100 shadow-lg rounded-lg py-1 z-20 border border-base-300 w-48`}
         >
           <div className="px-3 py-2 border-b border-base-300">
             <p className="text-sm font-medium">Delete message?</p>
@@ -246,7 +299,7 @@ const MessageOptions = ({ message, isOwnMessage }) => {
               className="w-8 h-8 flex items-center justify-center hover:bg-base-200 rounded-full transition-colors text-base-content/60"
               title="Close"
             >
-              ✕
+              ×
             </button>
           </div>
         </div>
